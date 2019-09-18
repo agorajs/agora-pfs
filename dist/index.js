@@ -18,7 +18,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var lodash_1 = __importDefault(require("lodash"));
 var agora_graph_1 = require("agora-graph");
-exports.default = pfs;
 /**
  * Executes the Push Force Scan (PFS) algorithm for this graph
  *
@@ -28,7 +27,7 @@ exports.default = pfs;
  *
  * @returns {Result} the updated graph
  */
-function pfs(graph, options) {
+exports.pfs = agora_graph_1.createFunction(function (graph, options) {
     if (options === void 0) { options = { padding: 0 }; }
     lodash_1.default.forEach(graph.nodes, function (n) {
         n.up = { x: n.x, y: n.y };
@@ -39,14 +38,18 @@ function pfs(graph, options) {
     scanY(graph.nodes, options.padding);
     lodash_1.default.forEach(graph.nodes, function (n) {
         if (n.up === undefined)
-            throw "cannot update undefined updated position for" + n;
+            throw 'cannot update undefined updated position for' + n;
         n.x = n.up.x;
         n.y = n.up.y;
         delete n.up; // PERF : maybe heavy cost
     });
     return { graph: graph };
-}
-exports.pfs = pfs;
+});
+exports.PFSAlgorithm = {
+    name: 'PFS',
+    algorithm: exports.pfs
+};
+exports.default = exports.PFSAlgorithm;
 /**
  * Scans and updates the list of nodes accordingly on the x axis
  * @param {Node[]} nodes The list of nodes
@@ -68,7 +71,7 @@ function scanX(nodes, padding) {
         for (var j = k + 1; j < nodes.length; j++) {
             var node = nodes[j];
             if (node.up === undefined)
-                throw "cannot update undefined updated position for" + node;
+                throw 'cannot update undefined updated position for' + node;
             node.up.x = node.up.x + maxDelta;
         }
         i = k + 1;
@@ -95,7 +98,7 @@ function scanY(nodes, padding) {
         for (var j = k + 1; j < nodes.length; j++) {
             var node = nodes[j];
             if (node.up === undefined)
-                throw "cannot update undefined updated position for" + node;
+                throw 'cannot update undefined updated position for' + node;
             node.up.y = node.up.y + maxDelta;
         }
         i = k + 1;
