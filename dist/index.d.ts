@@ -11,9 +11,7 @@
  * https://doi.org/10.1006/jvlc.1995.1010.
  * (http://www.sciencedirect.com/science/article/pii/S1045926X85710105)
  */
-import { Graph } from 'agora-graph';
-import { Result } from 'agora-algorithm';
-export default pfs;
+import { Algorithm } from 'agora-graph';
 /**
  * Executes the Push Force Scan (PFS) algorithm for this graph
  *
@@ -23,6 +21,10 @@ export default pfs;
  *
  * @returns {Result} the updated graph
  */
-export declare function pfs(graph: Graph, options?: {
+export declare const pfs: import("agora-graph").Function<{
     padding: number;
-}): Result;
+}>;
+export declare const PFSAlgorithm: Algorithm<{
+    padding: number;
+}>;
+export default PFSAlgorithm;
