@@ -12,11 +12,17 @@
  * (http://www.sciencedirect.com/science/article/pii/S1045926X85710105)
  */
 
-import _ from 'lodash'
-import { overlap, optimalVector, vector, diff, Graph, Node } from 'agora-graph'
-import { Result } from 'agora-algorithm'
-
-export default pfs
+import _ from 'lodash';
+import {
+  overlap,
+  optimalVector,
+  vector,
+  diff,
+  Graph,
+  Node,
+  createFunction,
+  Algorithm
+} from 'agora-graph';
 
 /**
  * Executes the Push Force Scan (PFS) algorithm for this graph
@@ -27,26 +33,37 @@ export default pfs
  *
  * @returns {Result} the updated graph
  */
-export function pfs(graph: Graph, options: { padding: number } = { padding: 0 }): Result {
+export const pfs = createFunction(function(
+  graph,
+  options: { padding: number } = { padding: 0 }
+) {
   _.forEach(graph.nodes, n => {
-    n.up = { x: n.x, y: n.y }
-  })
+    n.up = { x: n.x, y: n.y };
+  });
 
-  graph.nodes.sort((a, b) => a.x - b.x)
-  scanX(graph.nodes, options.padding)
+  graph.nodes.sort((a, b) => a.x - b.x);
+  scanX(graph.nodes, options.padding);
 
-  graph.nodes.sort((a, b) => a.y - b.y)
-  scanY(graph.nodes, options.padding)
+  graph.nodes.sort((a, b) => a.y - b.y);
+  scanY(graph.nodes, options.padding);
 
-  _.forEach(graph.nodes, (n) => {
-    if(n.up === undefined) throw "cannot update undefined updated position for" + n
-    n.x = n.up.x
-    n.y = n.up.y
-    delete n.up // PERF : maybe heavy cost
-  })
+  _.forEach(graph.nodes, n => {
+    if (n.up === undefined)
+      throw 'cannot update undefined updated position for' + n;
+    n.x = n.up.x;
+    n.y = n.up.y;
+    delete n.up; // PERF : maybe heavy cost
+  });
 
-  return { graph: graph }
-}
+  return { graph: graph };
+});
+
+export const PFSAlgorithm: Algorithm<{ padding: number }> = {
+  name: 'PFS',
+  algorithm: pfs
+};
+
+export default PFSAlgorithm;
 
 /**
  * Scans and updates the list of nodes accordingly on the x axis
@@ -54,30 +71,31 @@ export function pfs(graph: Graph, options: { padding: number } = { padding: 0 })
  * @param {number} [padding] the padding
  */
 function scanX(nodes: Node[], padding: number) {
-  let i = 0
+  let i = 0;
 
   while (i < nodes.length - 1) {
-    const k = same(nodes, i, (n1, n2) => n1.x === n2.x)
+    const k = same(nodes, i, (n1, n2) => n1.x === n2.x);
 
-    let maxDelta = 0
+    let maxDelta = 0;
 
     for (let m = i; m <= k; m++) {
       for (let j = k + 1; j < nodes.length; j++) {
-        const move = delta(nodes[m], nodes[j], padding).x
+        const move = delta(nodes[m], nodes[j], padding).x;
 
         if (Math.abs(move) > Math.abs(maxDelta)) {
-          maxDelta = move
+          maxDelta = move;
         }
       }
     }
 
     for (let j = k + 1; j < nodes.length; j++) {
-      const node = nodes[j]
-      if(node.up === undefined) throw "cannot update undefined updated position for" + node
-      node.up.x = node.up.x + maxDelta
+      const node = nodes[j];
+      if (node.up === undefined)
+        throw 'cannot update undefined updated position for' + node;
+      node.up.x = node.up.x + maxDelta;
     }
 
-    i = k + 1
+    i = k + 1;
   }
 }
 
@@ -87,28 +105,29 @@ function scanX(nodes: Node[], padding: number) {
  * @param {number} [padding] the padding
  */
 function scanY(nodes: Node[], padding: number) {
-  let i = 0
+  let i = 0;
   while (i < nodes.length - 1) {
-    const k = same(nodes, i, (n1, n2) => n1.y === n2.y)
+    const k = same(nodes, i, (n1, n2) => n1.y === n2.y);
 
-    let maxDelta = 0
+    let maxDelta = 0;
     for (let m = i; m <= k; m++) {
       for (let j = k + 1; j < nodes.length; j++) {
-        const move = delta(nodes[m], nodes[j], padding).y
+        const move = delta(nodes[m], nodes[j], padding).y;
 
         if (Math.abs(move) > Math.abs(maxDelta)) {
-          maxDelta = move
+          maxDelta = move;
         }
       }
     }
 
     for (let j = k + 1; j < nodes.length; j++) {
-      const node = nodes[j]
-      if(node.up === undefined) throw "cannot update undefined updated position for" + node
-      node.up.y = node.up.y + maxDelta
+      const node = nodes[j];
+      if (node.up === undefined)
+        throw 'cannot update undefined updated position for' + node;
+      node.up.y = node.up.y + maxDelta;
     }
 
-    i = k + 1
+    i = k + 1;
   }
 }
 
@@ -118,14 +137,18 @@ function scanY(nodes: Node[], padding: number) {
  * @param {number} index index to check if same
  * @param {{(n1: Node, n2: Node)=> boolean}} callback
  */
-function same(nodes: Node[], index: number, callback: { (n1: Node, n2: Node): boolean; }) {
-  let k = index
+function same(
+  nodes: Node[],
+  index: number,
+  callback: { (n1: Node, n2: Node): boolean }
+) {
+  let k = index;
   while (k < nodes.length - 1) {
-    if (!callback(nodes[index], nodes[k + 1])) return k
-    k++
+    if (!callback(nodes[index], nodes[k + 1])) return k;
+    k++;
   }
 
-  return k
+  return k;
 }
 
 /**
@@ -137,8 +160,12 @@ function same(nodes: Node[], index: number, callback: { (n1: Node, n2: Node): bo
  *
  * @returns {{x: number, y:number}} 0 if no overlap, a value otherwise
  */
-function delta(node1: Node, node2: Node, padding: number = 0): { x: number; y: number; } {
-  if (!overlap(node1, node2, padding)) return { x: 0, y: 0 }
+function delta(
+  node1: Node,
+  node2: Node,
+  padding: number = 0
+): { x: number; y: number } {
+  if (!overlap(node1, node2, padding)) return { x: 0, y: 0 };
 
-  return diff(optimalVector(node1, node2, padding), vector(node1, node2))
+  return diff(optimalVector(node1, node2, padding), vector(node1, node2));
 }
