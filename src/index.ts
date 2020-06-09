@@ -13,15 +13,14 @@
  */
 
 import _ from 'lodash';
+import type { Algorithm } from 'agora-graph';
 import {
   overlap,
   optimalVector,
   vector,
   diff,
-  Graph,
   Node,
   createFunction,
-  Algorithm
 } from 'agora-graph';
 
 /**
@@ -33,11 +32,11 @@ import {
  *
  * @returns {Result} the updated graph
  */
-export const pfs = createFunction(function(
+export const pfs = createFunction(function (
   graph,
   options: { padding: number } = { padding: 0 }
 ) {
-  _.forEach(graph.nodes, n => {
+  _.forEach(graph.nodes, (n) => {
     n.up = { x: n.x, y: n.y };
   });
 
@@ -47,7 +46,7 @@ export const pfs = createFunction(function(
   graph.nodes.sort((a, b) => a.y - b.y);
   scanY(graph.nodes, options.padding);
 
-  _.forEach(graph.nodes, n => {
+  _.forEach(graph.nodes, (n) => {
     if (n.up === undefined)
       throw 'cannot update undefined updated position for' + n;
     n.x = n.up.x;
@@ -60,7 +59,7 @@ export const pfs = createFunction(function(
 
 export const PFSAlgorithm: Algorithm<{ padding: number }> = {
   name: 'PFS',
-  algorithm: pfs
+  algorithm: pfs,
 };
 
 export default PFSAlgorithm;
@@ -165,7 +164,7 @@ function delta(
   node2: Node,
   padding: number = 0
 ): { x: number; y: number } {
-  if (!overlap(node1, node2, padding)) return { x: 0, y: 0 };
+  if (!overlap(node1, node2, { padding })) return { x: 0, y: 0 };
 
   return diff(optimalVector(node1, node2, padding), vector(node1, node2));
 }
