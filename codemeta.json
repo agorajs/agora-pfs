@@ -1,5 +1,5 @@
 {
-  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@context": "https://w3id.org/codemeta/3.0",
   "type": "SoftwareSourceCode",
   "applicationCategory": "Computer Science",
   "author": [
@@ -67,9 +67,7 @@
   "version": "0.3.0",
   "developmentStatus": "inactive",
   "funding": "ANR-17-CE38-0013",
-  "codemeta:isSourceCodeOf": {
-    "id": "agorajs"
-  },
+  "isSourceCodeOf": "agorajs",
   "issueTracker": "https://github.com/agorajs/agora-pfs/issues",
   "referencePublication": "https://dx.doi.org/10.7155/jgaa.00532"
 }
